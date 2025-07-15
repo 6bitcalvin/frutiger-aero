@@ -1,0 +1,1052 @@
+/* General reset and base styles */
+:root {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light dark;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Ensure the app takes full screen without margins or scrollbars */
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevent scrollbars on the OS level */
+}
+
+/* Ensure the root element fills the body */
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+/* Main container for the OS 
+  FIX: The `cursor: none` property is set here. 
+  Any child element with a `cursor` property (like `pointer` or `move`)
+  will override this. The fix is to remove those properties from child elements.
+*/
+.aero-os-container {
+  width: 100vw;
+  height: 100vh;
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  user-select: none;
+  cursor: none; /* Hide the default cursor */
+  transition: background-image 0.5s ease-in-out;
+}
+
+/* --- ADDITION: Scanline Overlay --- */
+.aero-os-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(rgba(0,0,0,0.15) 50%, transparent 50%);
+    background-size: 100% 4px;
+    opacity: 0.2;
+    pointer-events: none;
+    z-index: 9997; /* Below cursor and menus, above everything else */
+}
+
+
+/* All interactive elements should also have no cursor */
+.aero-os-container * {
+    cursor: none;
+}
+
+#animated-wallpaper-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+/* Custom Cursor */
+.custom-cursor {
+  position: fixed;
+  color: white;
+  z-index: 9999;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+}
+
+/* Desktop area and Icons */
+.desktop {
+  flex-grow: 1; 
+  position: relative; 
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 20px;
+  overflow: hidden; 
+}
+
+.desktop-icon-wrapper {
+  /* Standard wrapper for icons in the flex flow */
+}
+
+.desktop-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 100px;
+  text-align: center;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+  padding: 5px;
+  border: 1px solid transparent;
+}
+.desktop-icon:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+.desktop-icon.selected {
+  background-color: var(--selection-bg, rgba(40, 120, 220, 0.5));
+  border: 1px solid var(--selection-border, rgba(40, 120, 220, 0.8));
+}
+.desktop-icon .icon-container {
+  color: white;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5));
+}
+.desktop-icon span {
+  margin-top: 8px;
+  color: white;
+  font-size: 14px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+  word-break: break-word;
+}
+
+/* Selection Box & Context Menu */
+.selection-box {
+    position: fixed;
+    background-color: var(--selection-bg, rgba(40, 120, 220, 0.3));
+    border: 1px dotted var(--selection-border, rgba(40, 120, 220, 0.8));
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* --- ENHANCEMENT: More glassy context menu --- */
+.context-menu {
+    position: fixed;
+    background-color: rgba(240, 245, 255, 0.7); /* Slightly less opaque */
+    backdrop-filter: blur(20px) saturate(180%); /* More blur and saturation */
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.3); /* Lighter border */
+    border-radius: 8px; /* Softer radius */
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3); /* Deeper shadow */
+    z-index: 9998;
+    padding: 6px; /* A bit more padding */
+    width: 220px;
+}
+.context-menu ul { list-style: none; padding: 0; margin: 0; }
+.context-menu li { 
+    padding: 10px 15px; /* More padding for easier clicking */
+    font-size: 14px; 
+    color: #1a1a1a; 
+    display: flex; 
+    align-items: center; 
+    border-radius: 5px; /* Rounded items */
+    transition: background-color 0.15s, color 0.15s;
+}
+.context-menu li:hover { 
+    background-color: var(--selection-bg, rgba(40, 120, 220, 0.7)); 
+    color: white; 
+    text-shadow: 0 0 5px rgba(255,255,255,0.5);
+}
+
+/* Submenu Styles */
+.context-menu .submenu {
+    position: absolute;
+    left: 100%;
+    top: -5px; 
+    background-color: rgba(240, 245, 255, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid #999;
+    border-radius: 5px;
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+    padding: 5px 0;
+    width: 200px;
+}
+
+/* --- ENHANCEMENT: Glassy Taskbar --- */
+.taskbar {
+  position: relative;
+  width: 100%;
+  height: 50px;
+  background: var(--taskbar-bg, linear-gradient(to bottom, #245edb 0%, #3f8ce0 100%));
+  border-top: 1px solid var(--taskbar-border, #4a98e3);
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  padding: 0 5px;
+  z-index: 1000;
+  transition: background 0.3s ease;
+  flex-shrink: 0; 
+}
+
+/* Shine effect for taskbar */
+.taskbar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.3), transparent);
+  pointer-events: none;
+}
+
+/* --- ENHANCEMENT: Vista-style Start Orb --- */
+.start-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin: -3px 5px;
+  border: none;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 120%, #7db9e8 0%, #1e5799 100%);
+  color: white;
+  transition: all 0.2s;
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.2), inset 0 2px 2px rgba(255,255,255,0.4), 0 2px 5px rgba(0,0,0,0.5);
+}
+.start-button:hover { 
+  box-shadow: 0 0 5px 3px #fff, 0 0 0 2px rgba(0,0,0,0.2), inset 0 2px 2px rgba(255,255,255,0.4), 0 2px 5px rgba(0,0,0,0.5);
+}
+.start-button:active {
+  background: radial-gradient(circle at 50% 0%, #1e5799 0%, #7db9e8 100%);
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.2), inset 0 2px 5px rgba(0,0,0,0.5);
+}
+.start-button svg {
+  font-size: 32px;
+  margin: 0;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.7));
+}
+
+.taskbar-items {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    gap: 8px;
+    padding-left: 8px;
+}
+.taskbar-item {
+    background: linear-gradient(to bottom, rgba(255,255,255,0.25), rgba(255,255,255,0.1));
+    border: 1px solid rgba(255,255,255,0.4);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    font-size: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.3), 0 1px 2px rgba(0,0,0,0.3);
+    transition: all 0.2s ease;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+.taskbar-item:hover {
+    background: linear-gradient(to bottom, rgba(255,255,255,0.4), rgba(255,255,255,0.2));
+}
+.taskbar-item.active {
+    background: linear-gradient(to top, rgba(255,255,255,0.25), rgba(255,255,255,0.1));
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.3), 0 1px 1px rgba(255,255,255,0.2);
+    border-color: rgba(255,255,255,0.3);
+}
+
+.taskbar-right { margin-left: auto; height: 100%; }
+.clock { color: white; font-size: 14px; text-shadow: 1px 1px 2px rgba(0,0,0,0.6); padding: 0 15px; height: 100%; display: flex; align-items: center; background: rgba(0,0,0,0.1); border-left: 1px solid var(--taskbar-border, #4a98e3); box-shadow: inset 1px 0 3px rgba(0,0,0,0.2); }
+
+/* Start Menu */
+.start-menu {
+  position: absolute; bottom: 55px; left: 5px; width: 350px; background: var(--start-menu-bg, linear-gradient(to bottom, #3f8ce0, #245edb)); border: 1px solid var(--taskbar-border, #4a98e3); border-radius: 12px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); color: white; z-index: 9998; padding: 5px; transition: background 0.3s ease;
+}
+.start-menu-header { padding: 10px 15px; font-size: 1.5em; font-weight: bold; border-bottom: 1px solid rgba(255, 255, 255, 0.3); background-color: rgba(0,0,0,0.1); border-top-left-radius: 8px; border-top-right-radius: 8px; }
+.start-menu ul { list-style: none; padding: 0; margin: 0; }
+.start-menu li { padding: 10px 15px; border-radius: 6px; transition: background-color 0.2s; font-size: 1.1em; }
+.start-menu li:hover { background-color: rgba(255, 255, 255, 0.2); }
+
+/* --- ENHANCEMENT: Glassy Window --- */
+.window {
+    position: absolute; 
+    width: 500px; 
+    height: 350px; 
+    backdrop-filter: blur(25px) saturate(150%);
+    -webkit-backdrop-filter: blur(25px) saturate(150%);
+    background: rgba(230, 240, 255, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-top-color: rgba(255, 255, 255, 0.4);
+    border-radius: 8px; 
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4); 
+    display: flex; 
+    flex-direction: column; 
+    transition: border 0.3s ease, top 0.2s, left 0.2s, width 0.2s, height 0.2s; 
+    resize: both; 
+    overflow: hidden; 
+    min-width: 250px; 
+    min-height: 150px;
+}
+.title-bar { 
+    background: var(--window-title-bg, linear-gradient(to bottom, #0054e8, #003dbd)); 
+    color: white; 
+    padding: 8px 12px; 
+    font-weight: bold; 
+    border-top-left-radius: 8px; 
+    border-top-right-radius: 8px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5); 
+    transition: background 0.3s ease; 
+    flex-shrink: 0;
+    position: relative;
+}
+/* Shine on title bar */
+.title-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.4), transparent);
+    pointer-events: none;
+}
+.title-bar-text { flex-grow: 1; }
+.title-bar-controls { display: flex; gap: 5px; }
+.title-bar-controls button {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 12px;
+  line-height: 24px;
+  text-align: center;
+  font-weight: bold;
+  padding: 0;
+  transition: background-color 0.2s;
+}
+.title-bar-controls button:hover { 
+  background-color: rgba(255, 255, 255, 0.2); 
+}
+.title-bar-controls .close-button { 
+  background: transparent; 
+}
+.title-bar-controls .close-button:hover {
+  background-color: #e12d2d;
+}
+.window-content { padding: 10px; flex-grow: 1; color: #002d62; background-color: #f0f8ff; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; overflow: auto; display: flex; flex-direction: column; }
+
+
+/* App-specific content styles */
+.settings-content h3, .settings-content h4 { margin-top: 0; margin-bottom: 5px; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
+.settings-content h4 { border-bottom: none; }
+.theme-options { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
+.theme-options button { padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; background-color: #e0e0e0; }
+.theme-options button:hover { background-color: #d0d0d0; }
+.theme-options button.active {
+    border-color: var(--taskbar-border, #4a98e3);
+    background-color: var(--selection-bg, #a8d1f7);
+    color: #000;
+    font-weight: bold;
+}
+.file-list { list-style: none; padding: 0; margin: 0; }
+.file-list li { padding: 5px; border-bottom: 1px solid #ddd; display:flex; align-items:center;}
+.file-list li:hover { background-color: var(--selection-bg, #a8d1f7); }
+.notepad { width: 100%; flex-grow: 1; border: none; resize: none; font-family: monospace; background-color: inherit; color: inherit; }
+
+
+/* --- Media Player Styles --- */
+.media-player-window {
+    background: var(--media-player-bg, rgba(20, 40, 80, 0.7));
+    backdrop-filter: blur(25px) saturate(160%);
+    -webkit-backdrop-filter: blur(25px) saturate(160%);
+    resize: none;
+}
+.media-player-window .window-content { background: transparent; padding: 0; color: white; }
+.media-player { display: flex; flex-direction: column; height: 100%; align-items: center; justify-content: center; }
+.media-player-main { flex-grow: 1; display: flex; padding: 10px; gap: 10px; overflow: hidden; width: 100%; }
+.playlist-container { flex: 1; background: rgba(0,0,0,0.2); border-radius: 5px; overflow-y: auto; }
+.playlist-container ul { list-style: none; margin: 0; padding: 5px; }
+.playlist-container li { padding: 8px; border-radius: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.playlist-container li.active { background: var(--media-player-highlight, rgba(0, 180, 255, 0.8)); }
+.now-playing-section { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
+.visualizer-canvas { width: 100%; height: 100px; background: rgba(0,0,0,0.2); border-radius: 5px; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
+.cd-art { width: 120px; height: 120px; background: radial-gradient(circle, #fff 20%, #ddd 22%, #ccc 23%, silver 40%, #eee 95%, #fff 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(255,255,255,0.3); }
+.cd-art.spinning { animation: spin 4s linear infinite; }
+.cd-hole { width: 30px; height: 30px; background: #333; border-radius: 50%; border: 5px solid #fff; }
+.media-controls { display: flex; align-items: center; padding: 10px; background: rgba(0,0,0,0.3); gap: 10px; flex-shrink: 0; width: 100%; box-sizing: border-box; }
+.control-button { background: linear-gradient(to bottom, #444, #222); border: 1px solid #666; color: var(--media-player-highlight, #0f0); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+.control-button.play-pause { width: 50px; height: 50px; font-size: 20px; background: linear-gradient(to bottom, #00c800, #009600); }
+input[type="range"] { -webkit-appearance: none; background: transparent; }
+input[type="range"]::-webkit-slider-runnable-track { height: 6px; background: rgba(0,0,0,0.4); border-radius: 3px; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; margin-top: -5px; width: 16px; height: 16px; border-radius: 50%; background: #ddd; border: 1px solid #999; }
+.progress-bar { flex-grow: 1; }
+.volume-slider { width: 100px; }
+
+/* --- Browser/Viewer Styles --- */
+.browser-window {
+    width: 80vw;
+    height: 80vh;
+    max-width: 1200px;
+    max-height: 900px;
+}
+.browser-window .window-content {
+    padding: 0;
+    overflow: hidden;
+    background-color: #fff; 
+}
+.browser { 
+    display: flex; 
+    flex-direction: column; 
+    height: 100%; 
+    background: #fff; 
+}
+.browser-view { 
+    flex-grow: 1; 
+    border: none; 
+    background: #fff; 
+}
+
+/* --- Video Player Styles --- */
+.video-player-window {
+    width: 640px;
+    height: 480px;
+}
+.video-player-window .window-content {
+    padding: 0;
+    overflow: hidden;
+    background-color: #000;
+}
+.video-player-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    color: white;
+    text-align: center;
+}
+.video-player {
+    width: 100%;
+    height: 100%;
+}
+.video-upload-placeholder button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background: var(--taskbar-bg);
+    color: white;
+    border: 1px solid var(--taskbar-border);
+    border-radius: 5px;
+}
+
+/* --- Music Maker Styles --- */
+.music-maker-window {
+    width: 800px;
+    height: 500px;
+    background: rgba(210, 230, 255, 0.7);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+}
+.music-maker-window .window-content {
+    background: transparent;
+    padding: 0;
+    overflow: hidden;
+}
+.music-maker-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    background-image: linear-gradient(rgba(255,255,255,0.2), rgba(255,255,255,0));
+}
+.music-maker-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px;
+    background: rgba(0,0,0,0.1);
+    border-bottom: 1px solid var(--window-border, rgba(0, 84, 232, 0.3));
+    flex-shrink: 0;
+}
+.music-maker-controls button {
+    padding: 8px 15px;
+    border: 1px solid rgba(0,0,0,0.2);
+    border-radius: 20px;
+    background: linear-gradient(to bottom, #fefefe, #d0d8e0);
+    box-shadow: 0 2px 3px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.5);
+    color: #333;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.music-maker-controls button:active {
+    background: linear-gradient(to top, #fefefe, #d0d8e0);
+    box-shadow: inset 0 2px 3px rgba(0,0,0,0.2);
+}
+.music-maker-controls label {
+    color: #002d62;
+    font-weight: bold;
+    text-shadow: 1px 1px 1px #fff;
+}
+.music-maker-controls input[type="range"] {
+    width: 120px;
+}
+.music-maker-main {
+    display: flex;
+    flex-grow: 1;
+    overflow: hidden;
+}
+.piano-roll {
+    display: flex;
+    flex-direction: column;
+    background: #b0c4de;
+    padding-top: 28px; /* Room for progress bar */
+    border-right: 2px solid #8898aa;
+    position: relative; 
+    flex-shrink: 0;
+}
+
+.piano-key-wrapper {
+    position: relative;
+    width: 80px;
+    height: 25px; /* Height of a natural key */
+    flex-shrink: 0;
+}
+.piano-key-wrapper:not(:last-child) {
+    border-bottom: 1px solid #8898aa;
+}
+
+.piano-key.natural {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, #f8f8f8, #e8e8e8);
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #333;
+}
+
+.piano-key.sharp {
+    position: absolute;
+    width: 50px;
+    height: 18px;
+    background: linear-gradient(to right, #666, #444);
+    color: white;
+    border: 1px solid #333;
+    border-radius: 2px;
+    right: 0;
+    top: -9px; /* Position it halfway over the boundary */
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: normal;
+}
+
+.sequencer-grid-container {
+    flex-grow: 1;
+    overflow-x: auto;
+    position: relative;
+}
+
+.sequencer-grid {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+.sequencer-row {
+    display: flex;
+    height: 25px;
+}
+.sequencer-cell {
+    width: 40px;
+    flex-shrink: 0; /* Prevent cells from shrinking */
+    height: 100%;
+    border-right: 1px solid rgba(0, 100, 200, 0.1);
+    border-bottom: 1px solid rgba(0, 100, 200, 0.1);
+    background-color: rgba(255,255,255,0.2);
+    transition: background-color 0.1s;
+    box-sizing: border-box;
+}
+
+.sequencer-cell:hover {
+    background-color: rgba(0, 180, 255, 0.2);
+}
+.sequencer-cell.active {
+    background: var(--selection-bg, rgba(40, 120, 220, 0.5));
+    background-image: linear-gradient(to bottom, rgba(255,255,255,0.3), transparent);
+    box-shadow: inset 0 0 5px var(--selection-border, rgba(40, 120, 220, 0.8));
+}
+
+.progress-bar-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 2px;
+    height: 100%;
+    background-color: var(--media-player-highlight, #ff0000);
+    box-shadow: 0 0 5px var(--media-player-highlight, #ff0000);
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* --- Weather App Styles --- */
+.weather-app-window {
+    background: linear-gradient(to bottom, #63a4ff, #87CEEB);
+    color: white;
+    resize: none;
+}
+.weather-app-window .window-content {
+    background: transparent;
+    align-items: center;
+    justify-content: center;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+}
+.weather-app {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+.weather-main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.weather-temp {
+    font-size: 4em;
+    font-weight: 300;
+}
+.weather-location {
+    font-size: 1.5em;
+}
+.weather-forecast {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+}
+.forecast-day {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    background: rgba(255,255,255,0.2);
+    padding: 10px;
+    border-radius: 8px;
+}
+
+/* --- Photo Viewer Styles --- */
+.photo-viewer-window .window-content {
+    padding: 0;
+    background: #333;
+}
+.photo-viewer {
+    display: flex;
+    height: 100%;
+}
+.photo-thumbnails {
+    width: 120px;
+    flex-shrink: 0;
+    overflow-y: auto;
+    background: #222;
+    padding: 5px;
+}
+.photo-thumbnails img {
+    width: 100%;
+    border-radius: 4px;
+    margin-bottom: 5px;
+    border: 2px solid transparent;
+}
+.photo-thumbnails img.active {
+    border-color: var(--selection-border);
+}
+.photo-main-view {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+}
+.photo-main-view img {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+/* --- Aero Vita App Styles --- */
+.aero-vita-window .window-content {
+    padding: 0;
+    overflow: hidden;
+}
+.aero-vita-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    color: white;
+    background: #0059b2; /* Fallback color */
+    position: relative;
+    overflow: hidden;
+}
+
+.vita-live-area-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+.vita-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 10px;
+    background: rgba(0,0,0,0.3);
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 2;
+}
+.vita-header > div {
+    display: flex;
+    gap: 10px;
+}
+
+.vita-content-overlay {
+    flex-grow: 1;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.vita-home-screen {
+    flex-grow: 1;
+    padding: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-content: flex-start;
+}
+.vita-orb {
+    width: 110px;
+    height: 110px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.35), rgba(255,255,255,0.05));
+    border: 1px solid rgba(255,255,255,0.5);
+    border-top-color: rgba(255,255,255,0.6);
+    border-left-color: rgba(255,255,255,0.55);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+    transform-origin: top right;
+    color: white;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+}
+.vita-orb:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.4);
+}
+.vita-orb.peeling {
+    transform: scale(0.9) rotate(-15deg);
+    opacity: 0.5;
+}
+.vita-orb span {
+    margin-top: 8px;
+    font-weight: bold;
+    font-size: 14px;
+}
+.vita-page-view {
+    flex-grow: 1;
+    position: relative;
+    padding: 20px;
+    backdrop-filter: blur(5px);
+    background: rgba(0,0,0,0.2);
+}
+.vita-back-button {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 32px;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5));
+}
+.vita-page-content {
+    text-align: center;
+    padding-top: 40px;
+}
+.vita-page-content h2 {
+    text-shadow: 0 2px 4px rgba(0,0,0,0.7);
+}
+.welcome-art {
+    margin-top: 20px;
+    color: rgba(255,255,255,0.8);
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+}
+
+.vita-friends-list {
+    list-style: none;
+    padding: 0;
+    margin: 20px auto;
+    width: 90%;
+    max-width: 400px;
+    text-align: left;
+}
+.vita-friends-list li {
+    background: rgba(255,255,255,0.1);
+    padding: 12px 18px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.1em;
+}
+.online-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9em;
+    font-style: italic;
+}
+.online-status::before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+.online-status.online::before { background: #4caf50; box-shadow: 0 0 5px #4caf50; }
+.online-status.away::before { background: #ffc107; box-shadow: 0 0 5px #ffc107; }
+.online-status.offline::before { background: #777; }
+
+.vita-trophy-list {
+    list-style: none;
+    padding: 0;
+    margin: 20px auto;
+    width: 90%;
+    max-width: 450px;
+    text-align: left;
+}
+.vita-trophy-list li {
+    background: rgba(0,0,0,0.2);
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border-left: 5px solid;
+}
+.vita-trophy-list li:nth-child(1) { border-color: #c9b037; }
+.vita-trophy-list li:nth-child(2) { border-color: #b4b4b4; }
+.vita-trophy-list li:nth-child(3) { border-color: #ad8a56; }
+.vita-trophy-list li:nth-child(4) { border-color: #ad8a56; }
+.vita-trophy-list li span { font-size: 1.1em; font-weight: bold;}
+.vita-trophy-list li small { display: block; color: #ccc; }
+
+.vita-settings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 400px;
+    margin: 20px auto;
+}
+.vita-setting-item {
+    background: rgba(0,0,0,0.2);
+    padding: 15px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.vita-setting-item label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.1em;
+}
+.toggle-button {
+    background-color: #555;
+    border: 1px solid #777;
+    border-radius: 15px;
+    width: 50px;
+    height: 26px;
+    position: relative;
+    transition: background-color 0.3s;
+}
+.toggle-button.on { background-color: #0078d4; }
+.toggle-button span {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+}
+.toggle-button.on span {
+    transform: translateX(24px);
+}
+.settings-action-button {
+    background: linear-gradient(to bottom, #444, #222);
+    border: 1px solid #666;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+}
+
+/* --- Petra's Place App Styles --- */
+.petra-window .window-content {
+    padding: 0;
+    overflow: hidden;
+}
+.petra-app-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: #a8d1f7;
+}
+.petra-background {
+    flex-grow: 1;
+    background: linear-gradient(to bottom, #87CEEB, #a8d1f7);
+    position: relative;
+}
+.petra-art-container {
+    position: absolute;
+    bottom: 150px; /* Adjusted position */
+    left: 50%;
+    transform: translateX(-50%);
+}
+.pixel-dog {
+    position: relative;
+    width: 100px;
+    height: 80px;
+    transform: scale(3);
+    image-rendering: pixelated;
+}
+.pixel-dog .pixel {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    left: calc(var(--x) * 10px);
+    top: calc(var(--y) * 10px);
+}
+.pixel-dog.jump {
+    animation: jump 0.5s ease-in-out;
+}
+@keyframes jump {
+    0%, 100% { transform: translateY(0) scale(3); }
+    50% { transform: translateY(-20px) scale(3); }
+}
+.action-heart {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #ff4757;
+    font-size: 24px;
+    animation: float-up 1s ease-out;
+}
+@keyframes float-up {
+    from { opacity: 1; transform: translate(-50%, 0); }
+    to { opacity: 0; transform: translate(-50%, -50px); }
+}
+
+.petra-ui {
+    padding: 15px;
+    background: rgba(0,0,0,0.1);
+    border-top: 1px solid rgba(255,255,255,0.2);
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+.petra-ui h2 {
+    margin: 0 0 10px;
+    text-align: center;
+    color: #002d62;
+    text-shadow: 1px 1px 1px #fff;
+}
+.petra-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+.stat-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #002d62;
+}
+.stat-bar progress {
+    width: 100%;
+    height: 15px;
+    -webkit-appearance: none;
+    appearance: none;
+}
+.stat-bar progress::-webkit-progress-bar {
+    background-color: #eee;
+    border-radius: 7px;
+}
+.stat-bar progress::-webkit-progress-value {
+    background-color: #4caf50;
+    border-radius: 7px;
+    transition: width 0.5s ease;
+}
+.petra-actions {
+    display: flex;
+    justify-content: space-around;
+}
+.petra-actions button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    background: linear-gradient(to bottom, #fefefe, #d0d8e0);
+    border: 1px solid #999;
+    border-radius: 8px;
+    padding: 10px;
+    width: 80px;
+    font-size: 14px;
+    color: #333;
+}
