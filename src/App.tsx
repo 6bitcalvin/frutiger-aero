@@ -871,6 +871,8 @@ function App() {
   const [highestZ, setHighestZ] = useState(100);
   const [contextMenu, setContextMenu] = useState({ visible: false, x: 0, y: 0 });
   const [selectionBox, setSelectionBox] = useState({ visible: false, x: 0, y: 0, width: 0, height: 0 });
+  const [contextMenu, setContextMenu] = useState<{ visible: boolean, x: number, y: number }>({ visible: false, x: 0, y: 0 });
+  const [selectionBox, setSelectionBox] = useState<{ visible: boolean, x: number, y: number, width: number, height: number }>({ visible: false, x: 0, y: 0, width: 0, height: 0 });
   
   const dragInfo = useRef<{ isDragging: boolean, target: string | null, offset: { x: number, y: number } }>({ isDragging: false, target: null, offset: { x: 0, y: 0 } });
   const selectInfo = useRef({ isSelecting: false, startX: 0, startY: 0 });
